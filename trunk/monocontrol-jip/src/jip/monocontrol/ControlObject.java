@@ -1,17 +1,19 @@
 package jip.monocontrol;
 
+import javax.sound.midi.ShortMessage;
+
 import org.jdom.Element;
 
 public abstract class ControlObject {
-	public MidiObject midi;
 	protected boolean blink;
 	protected long blinkTimer;
 	protected int midiChannel, ccValue, noteValue, positionX, positionY, sizeX,
 			sizeY, value, tickID;
 
 	
-	public ControlObject(MidiObject midi, int midiChannel, int ccValue,
+	public ControlObject(int midiChannel, int ccValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
+		this.midiChannel = midiChannel;
 		this.ccValue = ccValue;
 		this.positionX = positionX;
 		this.positionY = positionY;
@@ -19,38 +21,39 @@ public abstract class ControlObject {
 		this.sizeY = sizeY;
 		value = 0;
 		tickID = -1;
-		this.midiChannel = midiChannel;
-		this.midi = midi;
-		midi.plug(this, midiChannel); // registers midi event callbacks for
 										// objects
 		blink = true;
 		blinkTimer = System.currentTimeMillis() + 1000;
 	}
 
-	public void controllerChangeReceived(rwmidi.Controller rc) {
-		if (rc.getCC() == ccValue) {
+	public void controllerChangeReceived(ShortMessage rc) {
+		if (rc.getData1() == ccValue) {
 			MonoControl.blinkInputLight();
-			updateValue(rc.getValue());
+			updateValue(rc.getData2());
 			MonoControl.vm.refresh();
 		}
 	}
 
-	public void noteOnReceived(rwmidi.Note n) {
-		if (n.getPitch() == noteValue) {
+	public void noteOnReceived(ShortMessage n) {
+		if (n.getData1() == noteValue) {
 			MonoControl.blinkInputLight();
 			updateValue(120);
 			MonoControl.vm.refresh();
 		}
 	}
 
-	public void noteOffReceived(rwmidi.Note n) {
-		if (n.getPitch() == noteValue) {
+	public void noteOffReceived(ShortMessage n) {
+		if (n.getData1() == noteValue) {
 			MonoControl.blinkInputLight();
 			updateValue(0);
 			MonoControl.vm.refresh();
 		}
 	}
-
+	
+	public void sysexReceived(ShortMessage sm) {
+		// channel 8 -> clock. channel 12 -> reset
+	}
+	
 	public boolean buttonIsElement(int x, int y) {
 		if (x >= positionX && x < (positionX + sizeX)) {
 			if (y >= positionY && y < (positionY + sizeY)) {
@@ -62,7 +65,7 @@ public abstract class ControlObject {
 
 	public void setValue(int value) {
 		this.value = value;
-		midi.sendCC(midiChannel, ccValue, value);
+		MidiObject.sendCC(midiChannel, ccValue, value);
 	}
 
 	public void updateValue(int value) {
@@ -162,5 +165,7 @@ public abstract class ControlObject {
 	public abstract void loadJDOMXMLElement(Element el);
 
 	public abstract Element toJDOMXMLElement(Element el);
+
+	
 	
 }

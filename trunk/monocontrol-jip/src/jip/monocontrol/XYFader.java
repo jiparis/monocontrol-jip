@@ -1,15 +1,15 @@
 package jip.monocontrol;
 
-import org.jdom.Element;
+import javax.sound.midi.ShortMessage;
 
-import rwmidi.Note;
+import org.jdom.Element;
 
 public class XYFader extends ControlObject {
 	private int ccX, ccY, valueX, valueY, currentX, currentY, fadeToX, fadeToY;
 
-	public XYFader(MidiObject midi, int midiChannel, int ccValue,
+	public XYFader(int midiChannel, int ccValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
-		super(midi, midiChannel, ccValue, positionX, positionY, sizeX, sizeY);
+		super(midiChannel, ccValue, positionX, positionY, sizeX, sizeY);
 		ccX = ccValue;
 		ccY = ccValue + 1;
 		currentY = currentX = 0;
@@ -86,34 +86,34 @@ public class XYFader extends ControlObject {
 	}
 
 	@Override
-	public void controllerChangeReceived(rwmidi.Controller rc) {
-		if (rc.getCC() == ccX) {
+	public void controllerChangeReceived(ShortMessage rc) {
+		if (rc.getData1() == ccX) {
 			MonoControl.blinkInputLight();
-			updateValueX(rc.getValue());
+			updateValueX(rc.getData2());
 			MonoControl.vm.refresh();
-		} else if (rc.getCC() == ccY) {
+		} else if (rc.getData1() == ccY) {
 			MonoControl.blinkInputLight();
-			updateValueY(rc.getValue());
+			updateValueY(rc.getData2());
 			MonoControl.vm.refresh();
 		}
 	}
 
 	public void setValueX(int value) {
 		valueX = value;
-		midi.sendCC(midiChannel, ccX, value);
+		MidiObject.sendCC(midiChannel, ccX, value);
 	}
 
 	public void setValueY(int value) {
 		valueY = value;
-		midi.sendCC(midiChannel, ccY, value);
+		MidiObject.sendCC(midiChannel, ccY, value);
 	}
 
 	@Override
-	public void noteOnReceived(Note n) {
+	public void noteOnReceived(ShortMessage n) {
 	}
 
 	@Override
-	public void noteOffReceived(Note n) {
+	public void noteOffReceived(ShortMessage n) {
 
 	}
 

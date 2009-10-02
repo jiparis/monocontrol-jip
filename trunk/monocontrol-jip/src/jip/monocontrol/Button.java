@@ -1,8 +1,8 @@
 package jip.monocontrol;
 abstract class Button extends ControlObject {
-	public Button(MidiObject midi, int midiChannel, int ccValue, int positionX,
+	public Button(int midiChannel, int ccValue, int positionX,
 			int positionY) {
-		super(midi, midiChannel, ccValue, positionX, positionY, 1, 1);
+		super(midiChannel, ccValue, positionX, positionY, 1, 1);
 	}
 
 	@Override

@@ -1,13 +1,13 @@
 package jip.monocontrol;
 
+import javax.sound.midi.ShortMessage;
+
 import org.jdom.Element;
 
-import rwmidi.Note;
-
 public class PushButton extends Button {
-	public PushButton(MidiObject midi, int midiChannel, int ccValue,
+	public PushButton(int midiChannel, int ccValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
-		super(midi, midiChannel, ccValue, positionX, positionY);
+		super(midiChannel, ccValue, positionX, positionY);
 	}
 
 	@Override
@@ -24,11 +24,11 @@ public class PushButton extends Button {
 	}
 
 	@Override
-	public void noteOnReceived(Note n) {
+	public void noteOnReceived(ShortMessage n) {
 	}
 
 	@Override
-	public void noteOffReceived(Note n) {
+	public void noteOffReceived(ShortMessage n) {
 
 	}
 

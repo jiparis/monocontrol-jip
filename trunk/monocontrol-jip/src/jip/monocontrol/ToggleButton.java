@@ -1,13 +1,13 @@
 package jip.monocontrol;
 
+import javax.sound.midi.ShortMessage;
+
 import org.jdom.Element;
 
-import rwmidi.Note;
-
 public class ToggleButton extends Button {
-	public ToggleButton(MidiObject midi, int midiChannel, int ccValue,
+	public ToggleButton(int midiChannel, int ccValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
-		super(midi, midiChannel, ccValue, positionX, positionY);
+		super(midiChannel, ccValue, positionX, positionY);
 	}
 
 	@Override
@@ -21,11 +21,11 @@ public class ToggleButton extends Button {
 	}
 
 	@Override
-	public void noteOnReceived(Note n) {
+	public void noteOnReceived(ShortMessage n) {
 	}
 
 	@Override
-	public void noteOffReceived(Note n) {
+	public void noteOffReceived(ShortMessage n) {
 
 	}
 

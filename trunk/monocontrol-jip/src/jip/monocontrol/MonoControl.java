@@ -1,20 +1,25 @@
 package jip.monocontrol;
 
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+
+import javax.sound.midi.MidiDevice.Info;
 
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-import processing.core.*;
-import controlP5.*;
-import rwmidi.*;
+import processing.core.PApplet;
+import controlP5.ControlEvent;
+import controlP5.ControlP5;
+import controlP5.Radio;
+import controlP5.ScrollList;
+import controlP5.Textfield;
+import controlP5.Textlabel;
 
 public class MonoControl extends PApplet {
 
@@ -37,22 +42,23 @@ public class MonoControl extends PApplet {
 	static ControlP5 controlP5;
 	Textlabel headline;
 	static Textlabel statusLabel;
-	MidiInputDevice[] inputDevices;
-	MidiOutputDevice[] outputDevices;
+	
 	static ControlObject[] tickRegister;
 	int selectedInputNumber = -1;
 	int selectedOutputNumber = -1;
-	String[] midiInputDevices, midiOutputDevices;
+	List<Info> midiInputDevices, midiOutputDevices;
 	ScrollList inputSelect;
 	ScrollList outputSelect;
 	static ViewManager vm;
 	static boolean abletonModeValue = false;
+	MidiObject midi;
 
 	@SuppressWarnings("deprecation")
 	public void setup() {
 		size(540, 350);
 		frameRate(20);
 		vm = new ViewManager(); // object that manages the diffrent views
+		midi = new MidiObject();
 
 		tickRegister = new ControlObject[128];
 		// initializing user interface
@@ -200,32 +206,32 @@ public class MonoControl extends PApplet {
 		r.add("256", 2);
 		r.setTab("default");
 
-		if (vm.midi.ioReady) {
-			selectedInputNumber = 1;
-			selectedOutputNumber = 0;
-		}
+		
+		selectedInputNumber = 1;
+		selectedOutputNumber = 0;
+		
 		outputSelect = controlP5
 				.addScrollList("outputSelect", 20, 100, 235, 40);
 		outputSelect.setLabel("outputs");
-		midiOutputDevices = RWMidi.getOutputDeviceNames();
-		outputDevices = RWMidi.getOutputDevices();
-		for (int i = 0; i < midiOutputDevices.length; i++) {
-			controlP5.Button b = outputSelect.addItem("out" + i + " "
-					+ midiOutputDevices[i], i);
+		midiOutputDevices = MidiObject.getAvailibleOutputs();
+		int i = 0;
+		for (Info info: midiOutputDevices) {
+			controlP5.Button b = outputSelect.addItem(info.getName(), i);
 			b.setId(100 + i);
 			if (i == selectedOutputNumber)
 				b.setColorBackground(0xffefaa66);
+			i++;
 		}
 		inputSelect = controlP5.addScrollList("inputSelect", 275, 100, 235, 40);
 		inputSelect.setLabel("inputs");
-		midiInputDevices = RWMidi.getInputDeviceNames();
-		inputDevices = RWMidi.getInputDevices();
-		for (int i = 0; i < midiInputDevices.length; i++) {
-			controlP5.Button b = inputSelect.addItem("in" + i + " "
-					+ midiInputDevices[i], i);
+		midiInputDevices = MidiObject.getAvailibleInputs();
+		i = 0;
+		for (Info info: midiInputDevices) {
+			controlP5.Button b = inputSelect.addItem(info.getName(), i);
 			b.setId(200 + i);
 			if (i == selectedInputNumber)
 				b.setColorBackground(0xffefaa66);
+			i++;
 		}
 		vm.returnToPlayMode();
 	}
@@ -410,14 +416,14 @@ public class MonoControl extends PApplet {
 	void setMidiOut(int value) {
 		if (value != -1)
 			selectedOutputNumber = value;
-		vm.midi.setOutputDevice(outputDevices[selectedOutputNumber]);
+		midi.setOutputDevice(midiOutputDevices.get(selectedOutputNumber));
 
-		for (int i = 0; i < midiOutputDevices.length; i++) {
+		for (int i = 0; i < midiOutputDevices.size(); i++) {
 			if (i == selectedOutputNumber)
-				controlP5.controller("out" + i + " " + midiOutputDevices[i])
+				controlP5.controller(midiOutputDevices.get(i).getName())
 						.setColorBackground(0xffefaa66);
 			else
-				controlP5.controller("out" + i + " " + midiOutputDevices[i])
+				controlP5.controller(midiOutputDevices.get(i).getName())
 						.setColorBackground(0xff222222);
 		}
 	}
@@ -425,14 +431,14 @@ public class MonoControl extends PApplet {
 	void setMidiIn(int value) {
 		if (value != -1)
 			selectedInputNumber = value;
-		vm.midi.setInputDevice(inputDevices[selectedInputNumber]);
+		midi.setInputDevice(midiInputDevices.get(selectedInputNumber));
 
-		for (int i = 0; i < midiInputDevices.length; i++) {
+		for (int i = 0; i < midiInputDevices.size(); i++) {
 			if (i == selectedInputNumber)
-				controlP5.controller("in" + i + " " + midiInputDevices[i])
+				controlP5.controller(midiInputDevices.get(i).getName())
 						.setColorBackground(0xffefaa66);
 			else
-				controlP5.controller("in" + i + " " + midiInputDevices[i])
+				controlP5.controller(midiInputDevices.get(i).getName())
 						.setColorBackground(0xff222222);
 		}
 	}
@@ -514,10 +520,6 @@ public class MonoControl extends PApplet {
 	public void importVMLayout(Document layout) {
 
 		vm.clearViews();
-		vm.midi.input.closeMidi();
-		vm.midi.output.closeMidi();
-		setMidiIn(-1);
-		setMidiOut(-1);
 
 		int posx, posy, sizex, sizey, channel, cc;
 		if (layout.getRootElement().getName().equals("MonoControlLayout")) {
@@ -545,8 +547,8 @@ public class MonoControl extends PApplet {
 	}
 
 	public void exit() {
-		vm.midi.input.closeMidi();
-		vm.midi.output.closeMidi();
+		midi.closeOutputDevice();
+		midi.closeInputDevice();
 		super.exit();
 	}
 

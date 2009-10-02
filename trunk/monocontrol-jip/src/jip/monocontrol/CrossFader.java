@@ -1,15 +1,15 @@
 package jip.monocontrol;
 
-import org.jdom.Element;
+import javax.sound.midi.ShortMessage;
 
-import rwmidi.Note;
+import org.jdom.Element;
 
 public class CrossFader extends ControlObject {
 	private int fadeTo;
 
-	public CrossFader(MidiObject midi, int midiChannel, int ccValue,
+	public CrossFader(int midiChannel, int ccValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
-		super(midi, midiChannel, ccValue, positionX, positionY, sizeX, sizeY);
+		super(midiChannel, ccValue, positionX, positionY, sizeX, sizeY);
 	}
 
 	@Override
@@ -43,11 +43,11 @@ public class CrossFader extends ControlObject {
 	}
 
 	@Override
-	public void noteOnReceived(Note n){
+	public void noteOnReceived(ShortMessage n){
 	}
 	
 	@Override
-	public void noteOffReceived(Note n){
+	public void noteOffReceived(ShortMessage n){
 		
 	}
 	

@@ -2,6 +2,8 @@ package jip.monocontrol;
 
 import java.util.List;
 
+import javax.sound.midi.ShortMessage;
+
 import org.jdom.Attribute;
 import org.jdom.Element;
 
@@ -25,9 +27,9 @@ public class Looper extends ControlObject {
 	public static final int F7 = 113;
 
 
-	public Looper(MidiObject midi, int midiChannel, int ccValue, int positionX,
+	public Looper(int midiChannel, int ccValue, int positionX,
 			int positionY, int sizeX, int sizeY) {
-		super(midi, midiChannel, ccValue, positionX, positionY, sizeX, sizeY);
+		super(midiChannel, ccValue, positionX, positionY, sizeX, sizeY);
 
 		stopLoopsOnNextStep = new boolean[sizeX];
 		
@@ -74,15 +76,15 @@ public class Looper extends ControlObject {
 	}
 	
 	@Override
-	public void noteOnReceived(rwmidi.Note n) {
-		if (n.getPitch() == Looper.F7) { // F7
+	public void noteOnReceived(ShortMessage n) {
+		if (n.getData1() == Looper.F7) { // F7
 			MonoControl.blinkInputLight();
 			step();
 		}
 	}
 
 	@Override
-	public void controllerChangeReceived(rwmidi.Controller rc){
+	public void controllerChangeReceived(ShortMessage rc){
 		
 	}
 	
@@ -118,7 +120,7 @@ public class Looper extends ControlObject {
 			if(loops[y].isPlaying())
 			{
 				loops[y].stop();
-				midi.sendNoteOff(midiChannel, Looper.C3+y);
+				MidiObject.sendNoteOff(midiChannel, Looper.C3+y);
 			}
 			else
 			{
@@ -145,7 +147,7 @@ public class Looper extends ControlObject {
 			
 			stopLoopsOnNextStep[x] = false;
 			int loopCtrlValue = (y * 16);
-			midi.sendCC(midiChannel, OFFSET_START_CTRL+x, loopCtrlValue);
+			MidiObject.sendCC(midiChannel, OFFSET_START_CTRL+x, loopCtrlValue);
 			playLoop(x, y);
 			
 			//System.out.println("Gate loops is " + gateLoopChokes);
@@ -182,7 +184,7 @@ public class Looper extends ControlObject {
 		loops[loopNum].stop();
 		updateNavGrid();
 		if (loops[loopNum].getType() != Loop.HIT)
-			midi.sendNoteOff(midiChannel, Looper.C3+loopNum);
+			MidiObject.sendNoteOff(midiChannel, Looper.C3+loopNum);
 	}
 	
 	public void setLoopStopOnNextStep(int loopNum)
@@ -240,9 +242,9 @@ public class Looper extends ControlObject {
         			switch (loops[i].getType()) {
         				case Loop.HIT: // Hits we let it run to the end of the sample and don't send a noteOff on release
         					if (loops[i].getTrigger(step) == true) {
-        						midi.sendCC(midiChannel, OFFSET_START_CTRL+i, loopCtrlValue);
+        						MidiObject.sendCC(midiChannel, OFFSET_START_CTRL+i, loopCtrlValue);
         						if(!muteNotes)
-        							midi.sendNoteOn(midiChannel, Looper.C3+i,pressedRow * 16  +1);
+        							MidiObject.sendNoteOn(midiChannel, Looper.C3+i,pressedRow * 16  +1);
         						loops[i].setTrigger(step, false);
         					} else {
         						stopLoop(i);
@@ -252,9 +254,9 @@ public class Looper extends ControlObject {
         				case Loop.MOMENTARY:
         				case Loop.SLICE:
         					if (resCounter == 0 || loops[i].getTrigger(step)) {
-        						midi.sendCC(midiChannel, OFFSET_START_CTRL+i, loopCtrlValue);
+        						MidiObject.sendCC(midiChannel, OFFSET_START_CTRL+i, loopCtrlValue);
         						if(!muteNotes)
-        							midi.sendNoteOn(midiChannel, Looper.C3+i,pressedRow * 16  +1);
+        							MidiObject.sendNoteOn(midiChannel, Looper.C3+i,pressedRow * 16  +1);
         						loops[i].setTrigger(step, false);
         					}
         					// If it's a one shot loop, then we stop after the first iteration
@@ -274,7 +276,7 @@ public class Looper extends ControlObject {
         				case Loop.STEP:
         				default:
         					if (resCounter == 0) 
-        						midi.sendCC(midiChannel, OFFSET_START_CTRL+i, loopCtrlValue);
+        						MidiObject.sendCC(midiChannel, OFFSET_START_CTRL+i, loopCtrlValue);
         				
         					//Send note every time looprow is 0 or at it's offset
         	        		if((resCounter == 0) && (step == 0 || pressedRow > -1))
@@ -296,7 +298,7 @@ public class Looper extends ControlObject {
 	        	        				}
 	        	        			}	
 	        	        			if (sendNote)
-	        	        				midi.sendNoteOn(midiChannel, Looper.C3+i,pressedRow * 16  +1);
+	        	        				MidiObject.sendNoteOn(midiChannel, Looper.C3+i,pressedRow * 16  +1);
         	        			}
         	        			pressedRow = -1;
         	        				
