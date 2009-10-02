@@ -10,16 +10,14 @@ public class ViewManager {
 	String objectIdent = "";
 	ControlObject selected; // stores the selected ConrtrolObject
 	Monome m;
-	MidiObject midi;
 	View[] views;
 	int activeView;
 	int holdButtonX = -1; // saves coordinates of the last button beeing held -1
 							// if no button is held
 	int holdButtonY = -1;
-
+	
 	public ViewManager() {
 		m = new Monome(this);
-		midi = new MidiObject(this);
 		views = new View[16];
 		for (int i = 0; i < 16; i++) {
 			views[i] = new View("v" + i);
@@ -269,35 +267,34 @@ public class ViewManager {
 		} else {
 			if (type.equals("fader")) {
 				if (sizex == 1)
-					co = new Fader(midi, channel, cc,
+					co = new Fader(channel, cc,
 							posx, posy, sizex, sizey);
 			} else if (type.equals("crossfader")) {
 				if (sizey == 1)
-					co = new CrossFader(midi,
-							channel, cc, posx, posy, sizex, sizey);
+					co = new CrossFader(channel, cc, posx, posy, sizex, sizey);
 			} else if (type.equals("pushButton"))
-				co = new PushButton(midi, channel,
+				co = new PushButton(channel,
 						cc, posx, posy, sizex, sizey);
 			else if (type.equals("toggleButton"))
-				co = new ToggleButton(midi, channel,
+				co = new ToggleButton(channel,
 						cc, posx, posy, sizex, sizey);
 			else if (type.equals("noteButton"))
-				co = new NoteButton(midi, channel,
+				co = new NoteButton(channel,
 						cc, posx, posy, sizex, sizey);
 			else if (type.equals("xyfader"))
-				co = new XYFader(midi, channel, cc,
+				co = new XYFader(channel, cc,
 						posx, posy, sizex, sizey);
 			else if (type.equals("looper"))
-				co = new Looper(midi, channel, cc,
+				co = new Looper(channel, cc,
 						posx, posy, sizex, sizey);
 			else if (type.equals("abletonTracks"))
-				co = new AbletonTracks(midi, channel, cc,
+				co = new AbletonTracks(channel, cc,
 						posx, posy, sizex, sizey);
 			else
 				System.out.println("Invalid object type: " + type);
 			if (co!=null)
-				views[viewID].addControlObject(co);
-			
+				views[viewID].addControlObject(co);			
+
 			refresh();
 		}
 		return co;

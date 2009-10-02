@@ -16,12 +16,15 @@ public class View {
 
 	public void addControlObject(ControlObject co) {
 		objects.add(co);
+		MidiObject.plug(co.midiChannel, co); // registers midi event callbacks
 	}
 
 	public void deleteControlObject(int x, int y) {
 		for (ControlObject co : objects) {
-			if (co.buttonIsElement(x, y))
-				objects.remove(co);
+			if (co.buttonIsElement(x, y)){
+				MidiObject.plug(co.midiChannel, co); // registers midi event callbacks
+				objects.remove(co);				
+			}
 		}
 	}
 

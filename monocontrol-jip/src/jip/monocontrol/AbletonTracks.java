@@ -1,13 +1,15 @@
 package jip.monocontrol;
 
+import javax.sound.midi.ShortMessage;
+
 import org.jdom.Element;
 
 public class AbletonTracks extends ControlObject {
 	int controlCol;
 	int[] lastNoteOn;
-	public AbletonTracks(MidiObject midi, int midiChannel, int noteValue,
+	public AbletonTracks(int midiChannel, int noteValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
-		super(midi, midiChannel, noteValue, positionX, positionY, sizeX, sizeY);	
+		super(midiChannel, noteValue, positionX, positionY, sizeX, sizeY);	
 	    this.noteValue = noteValue;
 		controlCol = positionX + sizeX - 1;
 		lastNoteOn = new int[sizeX - 1];
@@ -31,7 +33,7 @@ public class AbletonTracks extends ControlObject {
 
 	public void press (int xi, int yi){
 		int onVal = noteValue + (sizeY * xi + yi);
-		midi.sendNoteOn(midiChannel, onVal, 127);
+		MidiObject.sendNoteOn(midiChannel, onVal, 127);
 		lastNoteOn[xi] = yi;
 	}
 	
@@ -44,7 +46,7 @@ public class AbletonTracks extends ControlObject {
 		int invertedyi = sizeY - yi - 1;
 		if (invertedyi < sizeX - 1){
 			int onVal = noteValue + (sizeY * (sizeX - 1)) + invertedyi;
-			midi.sendNoteOn(midiChannel, onVal, 127);
+			MidiObject.sendNoteOn(midiChannel, onVal, 127);
 			lastNoteOn[sizeY - yi - 1] = -1;
 		}		
 	}
@@ -72,10 +74,10 @@ public class AbletonTracks extends ControlObject {
 	}
 
 	@Override
-	public void noteOnReceived(rwmidi.Note n) {
+	public void noteOnReceived(ShortMessage n) {
 		super.noteOnReceived(n);
-		int pitch = n.getPitch();
-		int vel = n.getVelocity();
+		int pitch = n.getData1();
+		int vel = n.getData2();
 		if (pitch >= noteValue && pitch < noteValue + ((sizeX - 1) * sizeY)){
 			int xi = (pitch - noteValue) / sizeY;
 			int yi = pitch - (noteValue + (sizeY * xi));
@@ -86,7 +88,7 @@ public class AbletonTracks extends ControlObject {
 	}
 	
 	@Override
-	public void controllerChangeReceived(rwmidi.Controller rc) {		
+	public void controllerChangeReceived(ShortMessage m) {		
 	}
 	
 	

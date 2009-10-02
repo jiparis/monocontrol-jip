@@ -1,11 +1,13 @@
 package jip.monocontrol;
 
+import javax.sound.midi.ShortMessage;
+
 import org.jdom.Element;
 
 public class NoteButton extends Button {
 
-  public NoteButton(MidiObject midi, int midiChannel, int noteValue, int positionX, int positionY, int sizeX, int sizeY) {
-    super(midi, midiChannel, -1, positionX, positionY);
+  public NoteButton(int midiChannel, int noteValue, int positionX, int positionY, int sizeX, int sizeY) {
+    super(midiChannel, -1, positionX, positionY);
     this.noteValue = noteValue;
   }
  
@@ -13,9 +15,9 @@ public class NoteButton extends Button {
 public void setValue(int value) {
     this.value = value;
     if(value>0)
-      midi.sendNoteOn(midiChannel, noteValue, value);
+    	MidiObject.sendNoteOn(midiChannel, noteValue, value);
     else
-      midi.sendNoteOff(midiChannel, noteValue);
+    	MidiObject.sendNoteOff(midiChannel, noteValue);
   }
   @Override
 public void buttonEvent(int x, int y, int pressed) {
@@ -44,15 +46,15 @@ public int getNoteValue() {
     return noteValue;
   }
 
-public void noteOnReceived(rwmidi.Note n) {
+public void noteOnReceived(ShortMessage n) {
 	super.noteOnReceived(n);
-	if (n.getPitch() == noteValue){ //turn off on cued clips
+	if (n.getData1() == noteValue){ //turn off on cued clips
 		this.value = 0;
 	}
 }
 
 @Override
-public void controllerChangeReceived(rwmidi.Controller rc) {
+public void controllerChangeReceived(ShortMessage rc) {
 	
 }
 
