@@ -213,9 +213,6 @@ public class MonoControl extends PApplet {
 		for (Info info: midiOutputDevices) {
 			controlP5.Button b = outputSelect.addItem(info.getName(), i);
 			b.setId(100 + i);
-//			if (i == selectedOutputNumber){
-//				b.setColorBackground(0xffefaa66);
-//			}
 			i++;
 		}
 		inputSelect = controlP5.addScrollList("inputSelect", 275, 100, 235, 40);
@@ -225,9 +222,6 @@ public class MonoControl extends PApplet {
 		for (Info info: midiInputDevices) {
 			controlP5.Button b = inputSelect.addItem(info.getName(), i);
 			b.setId(200 + i);
-//			if (i == selectedInputNumber){
-//				b.setColorBackground(0xffefaa66);
-//			}
 			i++;
 		}
 				
@@ -391,13 +385,6 @@ public class MonoControl extends PApplet {
 	public void loadName(String filename) {
 		println("Loading Layout: " + filename);
 		importVMLayout(filename);
-	}
-
-	// function to save and reload the current layout after midi input has
-	// changed
-	public void reloadLayout() {
-		exportVMLayout(vm, "temp.xml");
-		importVMLayout("temp.xml");
 	}
 
 	// light up selected input/output
