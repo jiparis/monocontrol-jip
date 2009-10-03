@@ -108,7 +108,6 @@ public class MonoControl extends PApplet {
 		
 		Textfield tload = controlP5.addTextfield("loadName", width - 100,
 				height - 40, 80, 20);
-		tload.setValue("test.xml");
 		tload.setLabel("Load Layout");
 		tload.setColorActive(0xffefaa66);
 		tload.setTab("global");
@@ -206,10 +205,6 @@ public class MonoControl extends PApplet {
 		r.add("256", 2);
 		r.setTab("default");
 
-		
-		selectedInputNumber = 1;
-		selectedOutputNumber = 0;
-		
 		outputSelect = controlP5
 				.addScrollList("outputSelect", 20, 100, 235, 40);
 		outputSelect.setLabel("outputs");
@@ -218,8 +213,9 @@ public class MonoControl extends PApplet {
 		for (Info info: midiOutputDevices) {
 			controlP5.Button b = outputSelect.addItem(info.getName(), i);
 			b.setId(100 + i);
-			if (i == selectedOutputNumber)
-				b.setColorBackground(0xffefaa66);
+//			if (i == selectedOutputNumber){
+//				b.setColorBackground(0xffefaa66);
+//			}
 			i++;
 		}
 		inputSelect = controlP5.addScrollList("inputSelect", 275, 100, 235, 40);
@@ -229,10 +225,12 @@ public class MonoControl extends PApplet {
 		for (Info info: midiInputDevices) {
 			controlP5.Button b = inputSelect.addItem(info.getName(), i);
 			b.setId(200 + i);
-			if (i == selectedInputNumber)
-				b.setColorBackground(0xffefaa66);
+//			if (i == selectedInputNumber){
+//				b.setColorBackground(0xffefaa66);
+//			}
 			i++;
 		}
+				
 		vm.returnToPlayMode();
 	}
 
@@ -409,7 +407,6 @@ public class MonoControl extends PApplet {
 		} else if (theEvent.controller().id() > 199
 				&& theEvent.controller().id() < 300) {
 			setMidiIn((int) theEvent.controller().value());
-			reloadLayout();
 		}
 	}
 
