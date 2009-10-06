@@ -4,7 +4,8 @@ import javax.sound.midi.ShortMessage;
 
 import org.jdom.Element;
 
-public class AbletonTracks extends ControlObject {
+public class AbletonTracks extends ControlObject 
+	implements NoteListener, ClockListener {
 	int controlCol;
 	int[] lastNoteOn;
 	public AbletonTracks(int midiChannel, int noteValue,
@@ -73,9 +74,7 @@ public class AbletonTracks extends ControlObject {
 		return "abletonTracks";
 	}
 
-	@Override
 	public void noteOnReceived(ShortMessage n) {
-		super.noteOnReceived(n);
 		int pitch = n.getData1();
 		int vel = n.getData2();
 		if (pitch >= noteValue && pitch < noteValue + ((sizeX - 1) * sizeY)){
@@ -87,22 +86,42 @@ public class AbletonTracks extends ControlObject {
 		}
 	}
 	
-	@Override
-	public void controllerChangeReceived(ShortMessage m) {		
+	public void noteOffReceived(ShortMessage n) {
+		// do nothing
 	}
 	
+	int RESOLUTION = 12; // 1/8
+	int i = 0;
+	public void timingClockReceived() {	
+		if (i == RESOLUTION){
+			step();
+			i = 0;
+		}
+	}
 	
+	public void start(){
+		i = 0;
+		step();
+	}
+	
+	public void stop(){
+	}
+	
+	// todo: implement pattern recorder, etc
+	protected void step(){
+		
+	}
 	
 	@Override
 	public void loadJDOMXMLElement(Element el) {
-		// TODO Auto-generated method stub
-
+		RESOLUTION = Integer.parseInt(el.getAttribute("resolution").getValue());
 	}
 
 	@Override
 	public Element toJDOMXMLElement(Element el) {
-		// TODO Auto-generated method stub
+		el.setAttribute("resolution", String.valueOf(RESOLUTION));
 		return el;
 	}
 
+	
 }

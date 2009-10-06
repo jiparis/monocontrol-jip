@@ -7,7 +7,7 @@ import javax.sound.midi.ShortMessage;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-public class Looper extends ControlObject {
+public class Looper extends ControlObject implements NoteListener{
 	
 	public static final int NOT_SET = -1;
 	
@@ -75,17 +75,15 @@ public class Looper extends ControlObject {
 			if (x < controlCol) release(xi, yi);
 	}
 	
-	@Override
 	public void noteOnReceived(ShortMessage n) {
 		if (n.getData1() == Looper.F7) { // F7
-			MonoControl.blinkInputLight();
 			step();
 		}
 	}
 
-	@Override
-	public void controllerChangeReceived(ShortMessage rc){
-		
+
+	public void noteOffReceived(ShortMessage n) {
+		// do nothing		
 	}
 	
 	
@@ -260,8 +258,9 @@ public class Looper extends ControlObject {
         						loops[i].setTrigger(step, false);
         					}
         					// If it's a one shot loop, then we stop after the first iteration
-        	        		if (loops[i].getType() == Loop.SLICE && loops[i].isLastResInStep()) {
+        	        		if (loops[i].isLastResInStep()) {
         	    				stopLoop(i);
+        	    				loops[i].setPressedRow(-1);
         	    				pressedRow = -1;
         	    			}
         				// Don't break here, flow into SHOT	
@@ -269,6 +268,7 @@ public class Looper extends ControlObject {
         					// If it's a one shot loop, then we stop after the first iteration
         	        		if (loops[i].getType() == Loop.SHOT && loops[i].isLastResStep()) {
         	    				stopLoop(i);
+        	    				loops[i].setPressedRow(-1);
         	    				pressedRow = -1;
         	    			}
         	        	// Don't break flow into LOOP	
@@ -307,8 +307,9 @@ public class Looper extends ControlObject {
         					
         			};
         		}	
-        		
-        		loops[i].nextResCount();
+        	
+        		if(loops[i].isPlaying())
+        			loops[i].nextResCount();
         	}
         
 		MonoControl.vm.refresh();
@@ -377,4 +378,5 @@ public class Looper extends ControlObject {
 		muteNotes = mute;
 		
 	}
+
 }

@@ -4,7 +4,7 @@ import javax.sound.midi.ShortMessage;
 
 import org.jdom.Element;
 
-public class XYFader extends ControlObject {
+public class XYFader extends ControlObject implements CCListener{
 	private int ccX, ccY, valueX, valueY, currentX, currentY, fadeToX, fadeToY;
 
 	public XYFader(int midiChannel, int ccValue,
@@ -85,7 +85,6 @@ public class XYFader extends ControlObject {
 		MonoControl.vm.refresh();
 	}
 
-	@Override
 	public void controllerChangeReceived(ShortMessage rc) {
 		if (rc.getData1() == ccX) {
 			MonoControl.blinkInputLight();
@@ -106,20 +105,7 @@ public class XYFader extends ControlObject {
 	public void setValueY(int value) {
 		valueY = value;
 		MidiObject.sendCC(midiChannel, ccY, value);
-	}
-
-	@Override
-	public void noteOnReceived(ShortMessage n) {
-	}
-
-	@Override
-	public void noteOffReceived(ShortMessage n) {
-
-	}
-
-	@Override
-	public void updateValue(int value) {
-	}
+	}	
 
 	public void updateValueX(int value) {
 		valueX = value;

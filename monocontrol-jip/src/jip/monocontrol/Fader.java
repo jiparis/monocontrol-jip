@@ -4,7 +4,7 @@ import javax.sound.midi.ShortMessage;
 
 import org.jdom.Element;
 
-public class Fader extends ControlObject {
+public class Fader extends ControlObject implements CCListener{
 	private int fadeTo;
 
 	public Fader(int midiChannel, int ccValue, int positionX,
@@ -53,13 +53,11 @@ public class Fader extends ControlObject {
 		MonoControl.vm.refresh();
 	}
 
-	@Override
-	public void noteOnReceived(ShortMessage n){
-	}
-	
-	@Override
-	public void noteOffReceived(ShortMessage n){
-		
+	public void controllerChangeReceived(ShortMessage rc) {
+		if (rc.getData1() == ccValue) {
+			updateValue(rc.getData2());
+			MonoControl.vm.refresh();
+		}
 	}
 	
 	@Override
