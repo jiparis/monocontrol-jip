@@ -26,33 +26,29 @@ public abstract class ControlObject {
 		blinkTimer = System.currentTimeMillis() + 1000;
 	}
 
-	public void controllerChangeReceived(ShortMessage rc) {
-		if (rc.getData1() == ccValue) {
-			MonoControl.blinkInputLight();
-			updateValue(rc.getData2());
-			MonoControl.vm.refresh();
-		}
-	}
-
-	public void noteOnReceived(ShortMessage n) {
-		if (n.getData1() == noteValue) {
-			MonoControl.blinkInputLight();
-			updateValue(120);
-			MonoControl.vm.refresh();
-		}
-	}
-
-	public void noteOffReceived(ShortMessage n) {
-		if (n.getData1() == noteValue) {
-			MonoControl.blinkInputLight();
-			updateValue(0);
-			MonoControl.vm.refresh();
-		}
-	}
-	
-	public void sysexReceived(ShortMessage sm) {
-		// channel 8 -> clock. channel 12 -> reset
-	}
+//	public void controllerChangeReceived(ShortMessage rc) {
+//		if (rc.getData1() == ccValue) {
+//			MonoControl.blinkInputLight();
+//			updateValue(rc.getData2());
+//			MonoControl.vm.refresh();
+//		}
+//	}
+//
+//	public void noteOnReceived(ShortMessage n) {
+//		if (n.getData1() == noteValue) {
+//			MonoControl.blinkInputLight();
+//			updateValue(120);
+//			MonoControl.vm.refresh();
+//		}
+//	}
+//
+//	public void noteOffReceived(ShortMessage n) {
+//		if (n.getData1() == noteValue) {
+//			MonoControl.blinkInputLight();
+//			updateValue(0);
+//			MonoControl.vm.refresh();
+//		}
+//	}
 	
 	public boolean buttonIsElement(int x, int y) {
 		if (x >= positionX && x < (positionX + sizeX)) {

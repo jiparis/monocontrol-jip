@@ -4,7 +4,7 @@ import javax.sound.midi.ShortMessage;
 
 import org.jdom.Element;
 
-public class ToggleButton extends Button {
+public class ToggleButton extends Button implements CCListener{
 	public ToggleButton(int midiChannel, int ccValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
 		super(midiChannel, ccValue, positionX, positionY);
@@ -20,13 +20,11 @@ public class ToggleButton extends Button {
 		}
 	}
 
-	@Override
-	public void noteOnReceived(ShortMessage n) {
-	}
-
-	@Override
-	public void noteOffReceived(ShortMessage n) {
-
+	public void controllerChangeReceived(ShortMessage rc) {
+		if (rc.getData1() == ccValue) {
+			updateValue(rc.getData2());
+			MonoControl.vm.refresh();
+		}
 	}
 
 	@Override

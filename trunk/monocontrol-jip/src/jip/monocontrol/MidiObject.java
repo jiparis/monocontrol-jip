@@ -22,13 +22,18 @@ public class MidiObject implements Receiver{
 	MidiDevice inputDevice, outputDevice;
 	private static Receiver outputReceiver;
 	private static Transmitter inputTransmitter;
-	private static HashSet<ControlObject>[] plugs = new HashSet[16];
+	private static HashSet<NoteListener>[] plugs_note = new HashSet[16];
+	private static HashSet<CCListener>[] plugs_cc = new HashSet[16];
+	private static HashSet<ClockListener> plugs_clock;
+
 	
 	public MidiObject() {
 		infos = MidiSystem.getMidiDeviceInfo();
 		for (int i = 0; i < 16; i++){
-			plugs[i] = new HashSet<ControlObject>();
+			plugs_note[i] = new HashSet<NoteListener>();
+			plugs_cc[i] = new HashSet<CCListener>();
 		}
+		plugs_clock = new HashSet<ClockListener>();
 	}
 
 	public void setOutputDevice(Info info) {
@@ -157,17 +162,28 @@ public class MidiObject implements Receiver{
 
 	// plugging
 	public static void plug(int channel, ControlObject obj){
-		plugs[channel].add(obj);
+		if (obj instanceof NoteListener)
+			plugs_note[channel].add((NoteListener) obj);
+		if (obj instanceof CCListener)
+			plugs_cc[channel].add((CCListener) obj);
+		if (obj instanceof ClockListener){
+			plugs_clock.add((ClockListener) obj);
+		}
 	}
 	
 	public static void unplug(int channel, ControlObject obj){
-		plugs[channel].remove(obj);
+		if (obj instanceof NoteListener)
+			plugs_note[channel].remove(obj);
+		if (obj instanceof CCListener)
+			plugs_cc[channel].remove(obj);
+		if (obj instanceof ClockListener){
+			plugs_clock.remove(obj);
+		}
 	}
 	
 	// Receiver
 	public void close() {
-		// TODO Auto-generated method stub
-		
+		// do nothing		
 	}
 
 	public void send(MidiMessage msg, long time) {
@@ -175,30 +191,46 @@ public class MidiObject implements Receiver{
 			ShortMessage sm = (ShortMessage) msg;
 			int cmd = sm.getCommand();
 			int channel = sm.getChannel();
-			Set<ControlObject> objects = plugs[channel];
+			int status = sm.getStatus();			
+			
+			Set<NoteListener> objects_note = plugs_note[channel];
+			Set<CCListener> objects_cc = plugs_cc[channel];
+			
 			switch(cmd){
 			case ShortMessage.NOTE_ON:
-				for (ControlObject obj: objects){
+				for (NoteListener obj: objects_note){
 					obj.noteOnReceived(sm);
 				}
 				break;
 			case ShortMessage.NOTE_OFF:
-				for (ControlObject obj: objects){
+				for (NoteListener obj: objects_note){
 					obj.noteOffReceived(sm);
 				}
 				break;
 			case ShortMessage.CONTROL_CHANGE:
-				for (ControlObject obj: objects){
+				for (CCListener obj: objects_cc){
 					obj.controllerChangeReceived(sm);
 				}
 				break;			
-			case 0xF0: // Sysex for clock (ch 8) & reset (ch 12) events
-				for (ControlObject obj: objects){
-					obj.sysexReceived(sm);
+			case 0xF0: // Sysex for clock (status F8)
+				if (status == ShortMessage.TIMING_CLOCK)
+					for (ClockListener obj: plugs_clock){
+						obj.timingClockReceived();
+					}
+				else if (status == ShortMessage.START || status == ShortMessage.CONTINUE){
+					for (ClockListener obj: plugs_clock){
+						obj.start();
+					}
 				}
+				else if (status == ShortMessage.STOP){
+					for (ClockListener obj: plugs_clock){
+						obj.stop();
+					}
+				}
+
 				break;
 			default:
-				System.out.println(sm.getCommand());
+				System.out.println(sm.getStatus());
 			}
 		}
 		//logger.log(Level.INFO, msg.toString());		

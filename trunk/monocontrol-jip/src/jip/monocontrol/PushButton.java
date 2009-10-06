@@ -4,7 +4,7 @@ import javax.sound.midi.ShortMessage;
 
 import org.jdom.Element;
 
-public class PushButton extends Button {
+public class PushButton extends Button implements CCListener{
 	public PushButton(int midiChannel, int ccValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
 		super(midiChannel, ccValue, positionX, positionY);
@@ -18,18 +18,16 @@ public class PushButton extends Button {
 			setValue(0);
 	}
 
+	public void controllerChangeReceived(ShortMessage rc) {
+		if (rc.getData1() == ccValue) {
+			updateValue(rc.getData2());
+			MonoControl.vm.refresh();
+		}
+	}
+	
 	@Override
 	public String getType() {
 		return "pushButton";
-	}
-
-	@Override
-	public void noteOnReceived(ShortMessage n) {
-	}
-
-	@Override
-	public void noteOffReceived(ShortMessage n) {
-
 	}
 
 	@Override
