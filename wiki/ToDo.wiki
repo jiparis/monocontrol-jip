@@ -1,0 +1,6 @@
+#summary To-do list
+#labels Phase-Requirements
+
+
+  * Pattern recorder in Ableton Track object
+  * Global pattern recorder object (for all actions)
