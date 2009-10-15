@@ -1,7 +1,5 @@
 package jip.monocontrol;
 
-import javax.sound.midi.ShortMessage;
-
 import org.jdom.Element;
 
 public abstract class ControlObject {

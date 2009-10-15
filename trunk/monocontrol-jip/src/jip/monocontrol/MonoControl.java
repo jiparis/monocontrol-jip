@@ -56,7 +56,7 @@ public class MonoControl extends PApplet {
 	@SuppressWarnings("deprecation")
 	public void setup() {
 		size(540, 350);
-		frameRate(20);
+		frameRate(12);
 		vm = new ViewManager(); // object that manages the diffrent views
 		midi = new MidiObject();
 
@@ -243,7 +243,7 @@ public class MonoControl extends PApplet {
 			if (tickRegister[i] != null)
 				tickRegister[i].tick();
 		}
-		if (frameCount % 7 == 0) {
+		if (frameCount % 2 == 0) {
 			blinkOn = !blinkOn;
 			vm.refresh();
 		}

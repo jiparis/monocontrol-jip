@@ -16,6 +16,7 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 import javax.sound.midi.MidiDevice.Info;
 
+@SuppressWarnings("unchecked")
 public class MidiObject implements Receiver{
 	public static Logger logger = Logger.getLogger(MidiObject.class.getName());
 	public static Info[] infos;
@@ -72,7 +73,7 @@ public class MidiObject implements Receiver{
 	}
 	
 	public void closeInputDevice(){
-		if (this.inputTransmitter != null){
+		if (inputTransmitter != null){
 			inputTransmitter.close();
 		}
 		if (this.inputDevice != null && this.inputDevice.isOpen()){
