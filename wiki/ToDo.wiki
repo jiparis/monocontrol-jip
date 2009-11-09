@@ -2,5 +2,5 @@
 #labels Phase-Requirements,Featured
 
 
-  * Pattern recorder in Ableton Track object
+  * ~~Pattern recorder in Ableton Track object~~ DONE
   * Global pattern recorder object (for all actions)
