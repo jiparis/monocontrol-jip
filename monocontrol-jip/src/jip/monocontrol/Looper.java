@@ -2,12 +2,10 @@ package jip.monocontrol;
 
 import java.util.List;
 
-import javax.sound.midi.ShortMessage;
-
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-public class Looper extends ControlObject implements NoteListener{
+public class Looper extends ControlObject implements ClockListener{
 	
 	public static final int NOT_SET = -1;
 	
@@ -75,17 +73,27 @@ public class Looper extends ControlObject implements NoteListener{
 			if (x < controlCol) release(xi, yi);
 	}
 	
-	public void noteOnReceived(ShortMessage n) {
-		if (n.getData1() == Looper.F7) { // F7
-			step();
+//	public void noteOnReceived(ShortMessage n) {
+//		if (n.getData1() == Looper.F7) { // F7
+//			step();
+//		}
+//	}
+//
+//
+//	public void noteOffReceived(ShortMessage n) {
+//		// do nothing		
+//	}
+	
+	
+	int RESOLUTION = 12; // 1/8
+	int i = 0;
+	public void timingClockReceived() {	
+		i++;
+		if (i == RESOLUTION){
+			i = 0;
+			step();			
 		}
 	}
-
-
-	public void noteOffReceived(ShortMessage n) {
-		// do nothing		
-	}
-	
 	
 	// SevenUp
 	
@@ -319,6 +327,7 @@ public class Looper extends ControlObject implements NoteListener{
 	public Element toJDOMXMLElement(Element xmlLooper)
 	{		
 		xmlLooper.setAttribute(new Attribute("gateLoopChokes", gateLoopChokes.toString()));
+		xmlLooper.setAttribute("resolution", String.valueOf(RESOLUTION));
 		
 		Element xmlLoop;
 
@@ -348,7 +357,7 @@ public class Looper extends ControlObject implements NoteListener{
 		Integer loopIndex;
 		
 		gateLoopChokes = xmlLooper.getAttributeValue("gateLoopChokes") == null ? gateLoopChokes : Boolean.parseBoolean(xmlLooper.getAttributeValue("gateLoopChokes"));
-		
+		RESOLUTION = Integer.parseInt(xmlLooper.getAttribute("resolution").getValue());
 		xmlLoops = xmlLooper.getChildren();
 		
 		for (Element xmlLoop : xmlLoops)
@@ -376,6 +385,16 @@ public class Looper extends ControlObject implements NoteListener{
 
 	public void setLooperMute(boolean mute) {
 		muteNotes = mute;
+		
+	}
+
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void stop() {
+		// TODO Auto-generated method stub
 		
 	}
 
