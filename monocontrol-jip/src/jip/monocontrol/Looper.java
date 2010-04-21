@@ -13,7 +13,7 @@ public class Looper extends ControlObject implements ClockListener{
 	
 	private final static int OFFSET_START_CTRL = 96;
 
-	private Boolean gateLoopChokes = true;
+	Boolean gateLoopChokes = true;
 	private boolean muteNotes = false;
 
 	public boolean[] stopLoopsOnNextStep;
@@ -320,7 +320,7 @@ public class Looper extends ControlObject implements ClockListener{
         			loops[i].nextResCount();
         	}
         
-		MonoControl.vm.refresh();
+		ViewManager.singleton.refresh();
 	}
 	
 	@Override

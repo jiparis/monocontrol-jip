@@ -109,7 +109,7 @@ public class AbletonTracks extends ControlObject
 			int yi = pitch - (noteValue + (sizeY * xi));
 			if (vel==127 || vel==1) //Play or continue. Other values (0, 64:off; 126:cue)
 				lastNoteOn[xi] = yi;		
-			MonoControl.vm.refresh();
+			ViewManager.singleton.refresh();
 		}
 	}
 	
