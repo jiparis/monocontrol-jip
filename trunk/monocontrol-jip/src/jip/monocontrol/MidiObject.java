@@ -27,14 +27,15 @@ public class MidiObject implements Receiver{
 	private static HashSet<CCListener>[] plugs_cc = new HashSet[16];
 	private static HashSet<ClockListener> plugs_clock;
 
-	
-	public MidiObject() {
+	MainFrame mainApp;
+	public MidiObject(MainFrame mainFrame) {
 		infos = MidiSystem.getMidiDeviceInfo();
 		for (int i = 0; i < 16; i++){
 			plugs_note[i] = new HashSet<NoteListener>();
 			plugs_cc[i] = new HashSet<CCListener>();
 		}
 		plugs_clock = new HashSet<ClockListener>();
+		mainApp = mainFrame;
 	}
 
 	public void setOutputDevice(Info info) {
@@ -234,7 +235,8 @@ public class MidiObject implements Receiver{
 				System.out.println(sm.getStatus());
 			}
 		}
-		//logger.log(Level.INFO, msg.toString());		
+		//logger.log(Level.INFO, msg.toString());	
+		mainApp.vm.refresh();
 	}
 
 }

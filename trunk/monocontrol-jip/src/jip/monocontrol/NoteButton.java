@@ -52,7 +52,7 @@ public class NoteButton extends Button implements NoteListener {
 		if (n.getData1() == noteValue) {
 			MonoControl.blinkInputLight();
 			updateValue(n.getData2());
-			MonoControl.vm.refresh();
+			ViewManager.singleton.refresh();
 		}
 	}
 	
@@ -60,7 +60,7 @@ public class NoteButton extends Button implements NoteListener {
 		if (n.getData1() == noteValue) {
 			MonoControl.blinkInputLight();
 			updateValue(0);
-			MonoControl.vm.refresh();
+			ViewManager.singleton.refresh();
 		}
 	}
 

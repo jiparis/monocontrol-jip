@@ -23,7 +23,7 @@ public class ToggleButton extends Button implements CCListener{
 	public void controllerChangeReceived(ShortMessage rc) {
 		if (rc.getData1() == ccValue) {
 			updateValue(rc.getData2());
-			MonoControl.vm.refresh();
+			ViewManager.singleton.refresh();
 		}
 	}
 

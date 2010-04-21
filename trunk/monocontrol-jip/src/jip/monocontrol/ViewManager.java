@@ -15,15 +15,25 @@ public class ViewManager {
 	int holdButtonX = -1; // saves coordinates of the last button beeing held -1
 							// if no button is held
 	int holdButtonY = -1;
-	
-	public ViewManager() {
+	MainFrame app;
+static ViewManager singleton;
+
+	public ViewManager(MainFrame mainFrame) {
 		m = new Monome(this);
 		views = new View[16];
 		for (int i = 0; i < 16; i++) {
 			views[i] = new View("v" + i);
 		}
+		app = mainFrame;
+		singleton = this;
 	}
 
+//	public static ViewManager getSingleton(MainFrame mainFrame){
+//		if (singleton == null){
+//			singleton = new ViewManager(mainFrame);
+//		}
+//		return singleton;
+//	}
 	public void buttonEvent(int x, int y, int pressed) {
 		if (pressed > 0) {
 			if (x >= (MonoControl.monomeSizeX - 1)) { // pressed button is
@@ -40,9 +50,9 @@ public class ViewManager {
 				if (sel.length > 0) {
 					if (selected != null)
 						selected.setBlink(false);
-					MonoControl
-							.setStatusLabel(sel.length
-									+ " control objects belong to pressed button, first is selected.");
+					//MonoControl
+					//		.setStatusLabel(sel.length
+					//				+ " control objects belong to pressed button, first is selected.");
 					selected = sel[0];
 					selected.setBlink(true);
 					((Textfield) MonoControl.controlP5.controller("ccEdit"))
@@ -53,8 +63,8 @@ public class ViewManager {
 				} else {
 					selected.setBlink(false);
 					selected = null;
-					MonoControl
-							.setStatusLabel("no control objects belong to pressed button...");
+//					MonoControl
+//							.setStatusLabel("no control objects belong to pressed button...");
 				}
 			}
 			break;
@@ -261,9 +271,9 @@ public class ViewManager {
 		ControlObject co = null;
 		if (viewID < 0 || cc < 0 || cc > 127 || channel < 0 || channel > 15
 				|| posx < 0 || posy < 0 || sizex < 0 || sizey < 0) {
-			MonoControl
-					.setStatusLabel("Invalid Parameters. Could not create ControlObject: "
-							+ type);
+//			MonoControl
+//					.setStatusLabel("Invalid Parameters. Could not create ControlObject: "
+//							+ type);
 		} else {
 			if (type.equals("fader")) {
 				if (sizex == 1)
@@ -284,12 +294,18 @@ public class ViewManager {
 			else if (type.equals("xyfader"))
 				co = new XYFader(channel, cc,
 						posx, posy, sizex, sizey);
-			else if (type.equals("looper"))
+			else if (type.equals("looper")){
 				co = new Looper(channel, cc,
 						posx, posy, sizex, sizey);
-			else if (type.equals("abletonTracks"))
+				((Looper) co).RESOLUTION = MonoControl.RESOLUTION;
+				((Looper) co).gateLoopChokes = MonoControl.gateLoopChockes;
+			}
+			else if (type.equals("abletonTracks")){
 				co = new AbletonTracks(channel, cc,
 						posx, posy, sizex, sizey);
+				((AbletonTracks) co).RESOLUTION = MonoControl.RESOLUTION;
+				((AbletonTracks) co).STEPS = MonoControl.PATTERNSTEPS;
+			}
 			else
 				System.out.println("Invalid object type: " + type);
 			if (co!=null)
@@ -328,8 +344,8 @@ public class ViewManager {
 					.setColorBackground(0xff222222);
 		}
 		if (mode == 4 && this.mode != 3) {
-			MonoControl
-					.setStatusLabel("Click on a specific button type first..");
+//			MonoControl
+//					.setStatusLabel("Click on a specific button type first..");
 		} else
 			this.mode = mode;
 	}

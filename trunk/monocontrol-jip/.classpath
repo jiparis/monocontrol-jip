@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="lib/core.jar"/>
 	<classpathentry kind="lib" path="lib/oscP5.jar"/>
 	<classpathentry kind="lib" path="lib/jdom.jar"/>
+	<classpathentry kind="con" path="org.dyno.visual.swing.VS_LIBRARY/layoutext"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

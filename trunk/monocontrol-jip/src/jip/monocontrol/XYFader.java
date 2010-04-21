@@ -82,18 +82,18 @@ public class XYFader extends ControlObject implements CCListener{
 		if (valueX == fadeToX && valueY == fadeToY) {
 			unregisterFromTick();
 		}
-		MonoControl.vm.refresh();
+		ViewManager.singleton.refresh();
 	}
 
 	public void controllerChangeReceived(ShortMessage rc) {
 		if (rc.getData1() == ccX) {
 			MonoControl.blinkInputLight();
 			updateValueX(rc.getData2());
-			MonoControl.vm.refresh();
+			ViewManager.singleton.refresh();
 		} else if (rc.getData1() == ccY) {
 			MonoControl.blinkInputLight();
 			updateValueY(rc.getData2());
-			MonoControl.vm.refresh();
+			ViewManager.singleton.refresh();
 		}
 	}
 
