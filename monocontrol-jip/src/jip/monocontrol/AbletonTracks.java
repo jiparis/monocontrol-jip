@@ -15,7 +15,7 @@ public class AbletonTracks extends ControlObject
 	public AbletonTracks(int midiChannel, int noteValue,
 			int positionX, int positionY, int sizeX, int sizeY) {
 		super(midiChannel, noteValue, positionX, positionY, sizeX, sizeY);	
-	    this.noteValue = noteValue;
+	    this.cc = noteValue;
 		controlCol = positionX + sizeX - 1;
 		lastNoteOn = new int[sizeX - 1];
 		for (int i=0;i<lastNoteOn.length;i++) lastNoteOn[i] = -1;
@@ -42,7 +42,7 @@ public class AbletonTracks extends ControlObject
 	}
 
 	public void press (int xi, int yi){
-		int onVal = noteValue + (sizeY * xi + yi);
+		int onVal = cc + (sizeY * xi + yi);
 		MidiObject.sendNoteOn(midiChannel, onVal, 127);
 		lastNoteOn[xi] = yi;
 	}
@@ -55,7 +55,7 @@ public class AbletonTracks extends ControlObject
 		//if (lastNoteOn[yi] > -1){
 		int invertedyi = sizeY - yi - 1;
 		if (invertedyi < sizeX - 1){
-			int onVal = noteValue + (sizeY * (sizeX - 1)) + invertedyi;
+			int onVal = cc + (sizeY * (sizeX - 1)) + invertedyi;
 			MidiObject.sendNoteOn(midiChannel, onVal, 127);
 			lastNoteOn[sizeY - yi - 1] = -1;
 		}		
@@ -104,9 +104,9 @@ public class AbletonTracks extends ControlObject
 	public void noteOnReceived(ShortMessage n) {
 		int pitch = n.getData1();
 		int vel = n.getData2();
-		if (pitch >= noteValue && pitch < noteValue + ((sizeX - 1) * sizeY)){
-			int xi = (pitch - noteValue) / sizeY;
-			int yi = pitch - (noteValue + (sizeY * xi));
+		if (pitch >= cc && pitch < cc + ((sizeX - 1) * sizeY)){
+			int xi = (pitch - cc) / sizeY;
+			int yi = pitch - (cc + (sizeY * xi));
 			if (vel==127 || vel==1) //Play or continue. Other values (0, 64:off; 126:cue)
 				lastNoteOn[xi] = yi;		
 			ViewManager.singleton.refresh();

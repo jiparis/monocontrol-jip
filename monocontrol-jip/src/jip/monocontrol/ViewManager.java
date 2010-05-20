@@ -1,39 +1,45 @@
 package jip.monocontrol;
 import java.util.Vector;
 
-import controlP5.Textfield;
-
 public class ViewManager {
+	public static final int MODE_PLAY = 0,
+							MODE_EDIT = -1,
+							MODE_DELETE = 1,
+							MODE_FADER = 2,
+							MODE_BUTTON = 3,
+							MODE_MATRIX = 4,
+							MODE_XY = 5,
+							MODE_LOOPER = 6,
+							MODE_TRACKS = 7;
+	
+	
 	int mode = 0; // 0 means play mode, 1 delete mode.. see buttonEvent()
 	int nextObjectsCC = 0;
 	int nextObjectsChannel = 0;
 	String objectIdent = "";
-	ControlObject selected; // stores the selected ConrtrolObject
-	Monome m;
-	View[] views;
+	public ControlObject selected; // stores the selected ConrtrolObject
+	public Monome monome;
+	public View[] views;
 	int activeView;
 	int holdButtonX = -1; // saves coordinates of the last button beeing held -1
 							// if no button is held
 	int holdButtonY = -1;
-	MainFrame app;
-static ViewManager singleton;
+	
+	public static ViewManager singleton;
+	MainFrame fr;
 
-	public ViewManager(MainFrame mainFrame) {
-		m = new Monome(this);
+	public ViewManager() {
+		monome = new Monome(this);
 		views = new View[16];
 		for (int i = 0; i < 16; i++) {
 			views[i] = new View("v" + i);
 		}
-		app = mainFrame;
 		singleton = this;
 	}
 
-//	public static ViewManager getSingleton(MainFrame mainFrame){
-//		if (singleton == null){
-//			singleton = new ViewManager(mainFrame);
-//		}
-//		return singleton;
-//	}
+	public void setFrame(MainFrame fr){
+		this.fr = fr;
+	}
 	public void buttonEvent(int x, int y, int pressed) {
 		if (pressed > 0) {
 			if (x >= (MonoControl.monomeSizeX - 1)) { // pressed button is
@@ -44,31 +50,19 @@ static ViewManager singleton;
 			}
 		}
 		switch (mode) {
-		case -1: // edit mode
-			if (pressed > 0) {
-				ControlObject[] sel = getActiveView().getControlObject(x, y);
-				if (sel.length > 0) {
-					if (selected != null)
-						selected.setBlink(false);
-					//MonoControl
-					//		.setStatusLabel(sel.length
-					//				+ " control objects belong to pressed button, first is selected.");
-					selected = sel[0];
-					selected.setBlink(true);
-					((Textfield) MonoControl.controlP5.controller("ccEdit"))
-							.setValue("" + selected.getCCValue());
-					((Textfield) MonoControl.controlP5
-							.controller("channelEdit")).setValue(""
-							+ (selected.getChannel() + 1));
-				} else {
-					selected.setBlink(false);
-					selected = null;
-//					MonoControl
-//							.setStatusLabel("no control objects belong to pressed button...");
-				}
-			}
-			break;
-		case 1: // delete mode
+//		case MODE_EDIT: // edit mode
+//			if (pressed > 0) {
+//				ControlObject[] sel = getActiveView().getControlObject(x, y);
+//				if (sel.length > 0) {
+//					selected = sel[0];
+//					blink(selected);
+//					
+//				} else {					
+//					selected = null;
+//				}
+//			}
+//			break;
+		case MODE_DELETE: // delete mode
 			if (pressed > 0) {
 				getActiveView().deleteControlObject(x, y); // deletes the object
 															// user tapped on.
@@ -76,7 +70,7 @@ static ViewManager singleton;
 				refresh();
 			}
 			break;
-		case 2: // add fader/crossfader mode
+		case MODE_FADER: // add fader/crossfader mode
 			if (pressed > 0) {
 				if (holdButtonX >= 0 && holdButtonY >= 0) { // if one button is
 															// already held,
@@ -93,14 +87,14 @@ static ViewManager singleton;
 				returnToPlayMode();
 			}
 			break;
-		case 3: // add button mode
+		case MODE_BUTTON: // add button mode
 			if (pressed > 0) {
 				addControlObject(objectIdent, activeView, nextObjectsCC,
 						nextObjectsChannel, x, y, 1, 1);
 				returnToPlayMode();
 			}
 			break;
-		case 4: // add button matrix mode
+		case MODE_MATRIX: // add button matrix mode
 			if (pressed > 0) {
 				if (holdButtonX >= 0 && holdButtonY >= 0) { // if one button is
 															// already held,
@@ -130,7 +124,7 @@ static ViewManager singleton;
 				returnToPlayMode();
 			}
 			break;
-		case 5:
+		case MODE_XY:
 			if (pressed > 0) {
 				if (holdButtonX >= 0 && holdButtonY >= 0) { // if one button is
 															// already held,
@@ -148,7 +142,7 @@ static ViewManager singleton;
 				returnToPlayMode();
 			}
 			break;
-		case 6: //looper
+		case MODE_LOOPER: //looper
 			if (pressed > 0) {
 				if (holdButtonX >= 0 && holdButtonY >= 0) { // if one button is
 															// already held,
@@ -166,7 +160,7 @@ static ViewManager singleton;
 				returnToPlayMode();
 			}
 			break;
-		case 7: //ableton tracks
+		case MODE_TRACKS: //ableton tracks
 			if (pressed > 0) {
 				if (holdButtonX >= 0 && holdButtonY >= 0) { // if one button is
 															// already held,
@@ -194,15 +188,16 @@ static ViewManager singleton;
 
 	public void returnToPlayMode() {
 		mode = 0;
-		if (selected != null)
-			selected.setBlink(false);
 		selected = null;
 		holdButtonX = holdButtonY = -1;
 		int[] freeChanCC = searchFreeCC();
 		nextObjectsChannel = freeChanCC[0];
 		nextObjectsCC = freeChanCC[1];
-		// setStatusLabel("Next object created will have CC: "+vm.nextObjectsCC+" Channel: "
-		// +vm.nextObjectsChannel);
+		if (fr!=null){
+			fr.disableControls();
+			fr.setStatusLabel("Playing ...");
+		}
+		
 	}
 
 	public void refresh() {
@@ -214,7 +209,7 @@ static ViewManager singleton;
 		matrix = Matrix.melt(MonoControl.monomeSizeX, MonoControl.monomeSizeY,
 				matrix, getActiveView().getDrawMatrix());
 
-		m.refresh(matrix);
+		monome.refresh(matrix);
 	}
 
 	public void refresh(int[][] matrix) {
@@ -225,7 +220,7 @@ static ViewManager singleton;
 		matrix = Matrix.melt(MonoControl.monomeSizeX, MonoControl.monomeSizeY,
 				matrix, getActiveView().getDrawMatrix());
 
-		m.refresh(matrix);
+		monome.refresh(matrix);
 	}
 
 	public View getActiveView() {
@@ -242,7 +237,7 @@ static ViewManager singleton;
 		Vector<ControlObject> retC = new Vector<ControlObject>();
 		for (int i = 0; i < views.length; i++) {
 			for (int j = 0; j < views[i].objects.size(); j++) {
-				if (views[i].objects.get(j).getCCValue() == ccValue)
+				if (views[i].objects.get(j).getCC() == ccValue)
 					retC.add(views[i].objects.get(j));
 			}
 		}
@@ -253,12 +248,10 @@ static ViewManager singleton;
 		Vector<ControlObject> retC = new Vector<ControlObject>();
 		for (int i = 0; i < MonoControl.monomeSizeY; i++) {
 			for (int j = 0; j < views[i].objects.size(); j++) {
-				if (views[i].objects.get(j).getNoteValue() == noteValue) // returns
-																			// -1
-																			// for
-																			// none
-																			// note
-																			// buttons
+				ControlObject obj = views[i].objects.get(j);
+				if (obj instanceof NoteListener &&
+					obj.getCC() == noteValue) 
+					
 					retC.add(views[i].objects.get(j));
 			}
 		}
@@ -271,9 +264,7 @@ static ViewManager singleton;
 		ControlObject co = null;
 		if (viewID < 0 || cc < 0 || cc > 127 || channel < 0 || channel > 15
 				|| posx < 0 || posy < 0 || sizex < 0 || sizey < 0) {
-//			MonoControl
-//					.setStatusLabel("Invalid Parameters. Could not create ControlObject: "
-//							+ type);
+
 		} else {
 			if (type.equals("fader")) {
 				if (sizex == 1)
@@ -308,8 +299,11 @@ static ViewManager singleton;
 			}
 			else
 				System.out.println("Invalid object type: " + type);
-			if (co!=null)
-				views[viewID].addControlObject(co);			
+			
+			if (co!=null){
+				views[viewID].addControlObject(co);		
+				blink(co);
+			}
 
 			refresh();
 		}
@@ -324,25 +318,12 @@ static ViewManager singleton;
 	}
 
 	public void setMode(int mode, String objectIdent) {
-		if (this.mode == -1 && mode != -1) { // make sure edit mode returns to
-												// normal when quitting
-			MonoControl.controlP5.controller("editModeButton").setLabel(
-					"Enter Edit Mode");
-			MonoControl.controlP5.controller("editModeButton")
-					.setColorBackground(0xff222222);
-		}
 		this.mode = mode;
 		this.objectIdent = objectIdent;
 	}
 
 	public void setMode(int mode) {
-		if (this.mode == -1 && mode != -1) { // make sure edit mode returns to
-												// normal when quitting
-			MonoControl.controlP5.controller("editModeButton").setLabel(
-					"Enter Edit Mode");
-			MonoControl.controlP5.controller("editModeButton")
-					.setColorBackground(0xff222222);
-		}
+		
 		if (mode == 4 && this.mode != 3) {
 //			MonoControl
 //					.setStatusLabel("Click on a specific button type first..");
@@ -362,7 +343,7 @@ static ViewManager singleton;
 				free = true;
 				for (int i = 0; i < MonoControl.monomeSizeY; i++) {
 					for (int j = 0; j < views[i].objects.size(); j++) {
-						if (views[i].objects.get(j).getCCValue() == y
+						if (views[i].objects.get(j).getCC() == y
 								&& views[i].objects.get(j).getChannel() == x) {
 							free = false;
 							break;
@@ -381,6 +362,36 @@ static ViewManager singleton;
 				break;
 		}
 		return ChanCC;
+	}
+
+	public void blink(final ControlObject obj) {
+		new Thread(){
+			@Override
+			public void run() {											
+				long end = System.currentTimeMillis() + 1000L;
+				while(System.currentTimeMillis()<end){		
+					obj.setBlink(true);	
+					refresh();
+					try {
+						Thread.sleep(150);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					obj.setBlink(false);
+					refresh();
+					try {
+						Thread.sleep(150);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				obj.setBlink(false);
+				refresh();
+			}
+		}.start();
+		
 	}
 
 }

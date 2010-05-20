@@ -87,11 +87,9 @@ public class XYFader extends ControlObject implements CCListener{
 
 	public void controllerChangeReceived(ShortMessage rc) {
 		if (rc.getData1() == ccX) {
-			MonoControl.blinkInputLight();
 			updateValueX(rc.getData2());
 			ViewManager.singleton.refresh();
 		} else if (rc.getData1() == ccY) {
-			MonoControl.blinkInputLight();
 			updateValueY(rc.getData2());
 			ViewManager.singleton.refresh();
 		}
