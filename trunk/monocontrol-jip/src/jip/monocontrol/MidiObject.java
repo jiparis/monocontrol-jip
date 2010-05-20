@@ -26,16 +26,16 @@ public class MidiObject implements Receiver{
 	private static HashSet<NoteListener>[] plugs_note = new HashSet[16];
 	private static HashSet<CCListener>[] plugs_cc = new HashSet[16];
 	private static HashSet<ClockListener> plugs_clock;
-
-	MainFrame mainApp;
-	public MidiObject(MainFrame mainFrame) {
+	MonoControl mc;
+	
+	public MidiObject(MonoControl mc) {
 		infos = MidiSystem.getMidiDeviceInfo();
 		for (int i = 0; i < 16; i++){
 			plugs_note[i] = new HashSet<NoteListener>();
 			plugs_cc[i] = new HashSet<CCListener>();
 		}
 		plugs_clock = new HashSet<ClockListener>();
-		mainApp = mainFrame;
+		this.mc = mc;
 	}
 
 	public void setOutputDevice(Info info) {
@@ -127,8 +127,6 @@ public class MidiObject implements Receiver{
 				e.printStackTrace();
 			}
 			outputReceiver.send(msg, -1);
-			
-			MonoControl.blinkOutputLight();
 		}
 	}
 
@@ -142,8 +140,6 @@ public class MidiObject implements Receiver{
 				e.printStackTrace();
 			}
 			outputReceiver.send(msg, -1);
-			
-			MonoControl.blinkOutputLight();
 		}
 	}
 
@@ -157,8 +153,6 @@ public class MidiObject implements Receiver{
 				e.printStackTrace();
 			}
 			outputReceiver.send(msg, -1);
-			
-			MonoControl.blinkOutputLight();
 		}
 	}
 
@@ -236,7 +230,7 @@ public class MidiObject implements Receiver{
 			}
 		}
 		//logger.log(Level.INFO, msg.toString());	
-		mainApp.vm.refresh();
+		mc.vm.refresh();
 	}
 
 }

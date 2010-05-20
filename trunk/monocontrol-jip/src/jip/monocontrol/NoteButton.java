@@ -9,16 +9,16 @@ public class NoteButton extends Button implements NoteListener {
 	public NoteButton(int midiChannel, int noteValue, int positionX,
 			int positionY, int sizeX, int sizeY) {
 		super(midiChannel, -1, positionX, positionY);
-		this.noteValue = noteValue;
+		this.cc = noteValue;
 	}
 
 	@Override
 	public void setValue(int value) {
 		this.value = value;
 		if (value > 0)
-			MidiObject.sendNoteOn(midiChannel, noteValue, value);
+			MidiObject.sendNoteOn(midiChannel, cc, value);
 		else
-			MidiObject.sendNoteOff(midiChannel, noteValue);
+			MidiObject.sendNoteOff(midiChannel, cc);
 	}
 
 	@Override
@@ -35,30 +35,27 @@ public class NoteButton extends Button implements NoteListener {
 	}
 
 	public void setNoteValue(int v) {
-		this.noteValue = v;
+		this.cc = v;
 	}
 
 	@Override
-	public int getCCValue() { // returns notevalue when asked for cc..
-		return noteValue;
+	public int getCC() { // returns notevalue when asked for cc..
+		return cc;
 	}
 
-	@Override
 	public int getNoteValue() {
-		return noteValue;
+		return cc;
 	}
 
 	public void noteOnReceived(ShortMessage n) {
-		if (n.getData1() == noteValue) {
-			MonoControl.blinkInputLight();
+		if (n.getData1() == cc) {
 			updateValue(n.getData2());
 			ViewManager.singleton.refresh();
 		}
 	}
 	
 	public void noteOffReceived(ShortMessage n) {
-		if (n.getData1() == noteValue) {
-			MonoControl.blinkInputLight();
+		if (n.getData1() == cc) {
 			updateValue(0);
 			ViewManager.singleton.refresh();
 		}

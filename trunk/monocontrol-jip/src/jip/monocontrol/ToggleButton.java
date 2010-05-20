@@ -21,7 +21,7 @@ public class ToggleButton extends Button implements CCListener{
 	}
 
 	public void controllerChangeReceived(ShortMessage rc) {
-		if (rc.getData1() == ccValue) {
+		if (rc.getData1() == cc) {
 			updateValue(rc.getData2());
 			ViewManager.singleton.refresh();
 		}

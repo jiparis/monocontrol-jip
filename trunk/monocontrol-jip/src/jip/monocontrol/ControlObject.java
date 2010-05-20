@@ -5,14 +5,14 @@ import org.jdom.Element;
 public abstract class ControlObject {
 	protected boolean blink;
 	protected long blinkTimer;
-	protected int midiChannel, ccValue, noteValue, positionX, positionY, sizeX,
+	protected int midiChannel, cc, positionX, positionY, sizeX,
 			sizeY, value, tickID;
 
 	
-	public ControlObject(int midiChannel, int ccValue,
+	public ControlObject(int midiChannel, int cc,
 			int positionX, int positionY, int sizeX, int sizeY) {
 		this.midiChannel = midiChannel;
-		this.ccValue = ccValue;
+		this.cc = cc;
 		this.positionX = positionX;
 		this.positionY = positionY;
 		this.sizeX = sizeX;
@@ -20,33 +20,9 @@ public abstract class ControlObject {
 		value = 0;
 		tickID = -1;
 										// objects
-		blink = true;
+		blink = false;
 		blinkTimer = System.currentTimeMillis() + 1000;
 	}
-
-//	public void controllerChangeReceived(ShortMessage rc) {
-//		if (rc.getData1() == ccValue) {
-//			MonoControl.blinkInputLight();
-//			updateValue(rc.getData2());
-//			MonoControl.vm.refresh();
-//		}
-//	}
-//
-//	public void noteOnReceived(ShortMessage n) {
-//		if (n.getData1() == noteValue) {
-//			MonoControl.blinkInputLight();
-//			updateValue(120);
-//			MonoControl.vm.refresh();
-//		}
-//	}
-//
-//	public void noteOffReceived(ShortMessage n) {
-//		if (n.getData1() == noteValue) {
-//			MonoControl.blinkInputLight();
-//			updateValue(0);
-//			MonoControl.vm.refresh();
-//		}
-//	}
 	
 	public boolean buttonIsElement(int x, int y) {
 		if (x >= positionX && x < (positionX + sizeX)) {
@@ -59,28 +35,23 @@ public abstract class ControlObject {
 
 	public void setValue(int value) {
 		this.value = value;
-		MidiObject.sendCC(midiChannel, ccValue, value);
+		MidiObject.sendCC(midiChannel, cc, value);
 	}
 
 	public void updateValue(int value) {
 		this.value = value;
 	}
 
-	public void setCCValue(int cc) {
-		this.ccValue = cc;
+	public void setCC(int cc) {
+		this.cc = cc;
 	}
 
 	public void setChannel(int channel) {
 		this.midiChannel = channel;
 	}
 
-	public int getNoteValue() { // return -1 for none note objects, override in
-								// noteButton
-		return -1;
-	}
-
-	public int getCCValue() {
-		return ccValue;
+	public int getCC() {
+		return cc;
 	}
 
 	public int getChannel() {
@@ -122,17 +93,12 @@ public abstract class ControlObject {
 		}
 	}
 
-	protected int[][] getBlinkMatrix() {
-		if (blinkTimer > 0 && blinkTimer < System.currentTimeMillis()) {
-			blink = false;
-			blinkTimer = -1;
-		}
+	protected int[][] getBlinkMatrix() {		
 		int[][] matrix = new int[MonoControl.monomeSizeX][MonoControl.monomeSizeY];
-		if (MonoControl.blinkOn) {
-			for (int i = positionX; i < (sizeX + positionX); i++) {
-				for (int j = positionY; j < (sizeY + positionY); j++) {
-					matrix[i][j] = 1;
-				}
+		
+		for (int i = positionX; i < (sizeX + positionX); i++) {
+			for (int j = positionY; j < (sizeY + positionY); j++) {
+				matrix[i][j] = 1;
 			}
 		}
 		return matrix;

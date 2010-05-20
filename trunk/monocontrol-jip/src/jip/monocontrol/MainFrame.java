@@ -19,22 +19,29 @@ import javax.sound.midi.MidiDevice.Info;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
 import org.dyno.visual.swing.layouts.Constraints;
@@ -64,6 +71,7 @@ public class MainFrame extends JFrame {
 	private JButton addLooperButton;
 	private JLabel jLabel3;
 	
+	MonoControl mc;
 	static ViewManager vm;
 	MidiObject midi;
 	List<Info> midiInputDevices, midiOutputDevices;
@@ -78,8 +86,6 @@ public class MainFrame extends JFrame {
 	private JButton addMatrixButton;
 	private JRadioButton noteRadioButton;
 	private JButton addButtonButton;
-	private JLabel jLabel6;
-	private JTextField jTextField0;
 	private JLabel jLabel7;
 	private JLabel jLabel8;
 	private JLabel jLabel9;
@@ -98,11 +104,16 @@ public class MainFrame extends JFrame {
 	private ButtonGroup buttonGroup2;
 	private JLabel jLabel15;
 	private JComboBox stepsComboBox;
+	private JScrollPane jScrollPane0;
+	private JList pagesList;
+	private JScrollPane jScrollPane1;
+	private JList pageComponentList;
+	private JButton cancelButton;
 	private static final String PREFERRED_LOOK_AND_FEEL = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-	public MainFrame() {
-		initComponents();
-		vm = new ViewManager(this); // object that manages the diffrent views
-		midi = new MidiObject(this);
+	public MainFrame(MonoControl mc) {
+		this();
+		vm = mc.vm; // object that manages the diffrent views
+		midi = mc.midi;
 		midiInputDevices = MidiObject.getAvailibleInputs();
 		jComboBox0.addItem("");
 		for (Info info: midiInputDevices) {
@@ -126,9 +137,14 @@ public class MainFrame extends JFrame {
 					midi.setOutputDevice((Info)e.getItem());				
 			}		
 		});
+		((DefaultListModel)pageComponentList.getModel()).clear();
 		vm.returnToPlayMode();
+		disableControls();
 	}
-
+	public MainFrame(){
+		initComponents();
+		
+	}
 	private void initComponents() {
 		setLayout(new GroupLayout());
 		add(getJLabel1(), new Constraints(new Leading(170, 12, 12), new Leading(12, 11, 12, 12)));
@@ -143,22 +159,113 @@ public class MainFrame extends JFrame {
 		add(getJLabel2(), new Constraints(new Leading(10, 10, 10), new Leading(53, 11, 11)));
 		add(getAddXFaderButton(), new Constraints(new Leading(8, 74, 10, 10), new Leading(157, 10, 10)));
 		add(getAddButtonButton(), new Constraints(new Leading(8, 74, 10, 10), new Leading(69, 10, 10)));
-		add(getOpenFileButton(), new Constraints(new Leading(284, 74, 10, 10), new Leading(208, 11, 11)));
-		add(getSaveFileButton(), new Constraints(new Leading(284, 74, 10, 10), new Leading(235, 11, 11)));
-		add(getJLabel3(), new Constraints(new Leading(235, 123, 10, 10), new Leading(4, 11, 11)));
-		add(getHelpLabel(), new Constraints(new Leading(8, 384, 10, 10), new Leading(264, 23, 10, 10)));
-		add(getOscInTextField(), new Constraints(new Leading(344, 52, 10, 10), new Leading(57, 11, 11)));
-		add(getOscOutTextField(), new Constraints(new Leading(344, 52, 10, 10), new Leading(80, 11, 11)));
-		add(getJLabel10(), new Constraints(new Leading(306, 10, 10), new Leading(60, 11, 11)));
-		add(getJLabel11(), new Constraints(new Leading(298, 10, 10), new Leading(85, 11, 11)));
-		add(getButtonPanel(), new Constraints(new Leading(88, 188, 10, 10), new Leading(53, 208, 11, 11)));
-		add(getSize128(), new Constraints(new Leading(313, 10, 10), new Leading(127, 7, 7)));
-		add(getSize256(), new Constraints(new Leading(356, 6, 6), new Leading(127, 7, 7)));
-		add(getSize64(), new Constraints(new Leading(278, 6, 6), new Leading(127, 7, 7)));
-		add(getJLabel14(), new Constraints(new Leading(354, 10, 10), new Leading(113, 10, 10)));
+		add(getJLabel10(), new Constraints(new Leading(337, 10, 10), new Leading(11, 11, 11)));
+		add(getOscInTextField(), new Constraints(new Leading(337, 52, 10, 10), new Leading(25, 11, 11)));
+		add(getOscOutTextField(), new Constraints(new Leading(407, 52, 10, 10), new Leading(25, 11, 11)));
+		add(getJLabel11(), new Constraints(new Leading(407, 10, 10), new Leading(11, 11, 11)));
+		add(getJScrollPane0(), new Constraints(new Leading(287, 25, 10, 10), new Leading(59, 209, 10, 10)));
+		add(getJScrollPane1(), new Constraints(new Leading(314, 100, 10, 10), new Leading(59, 208, 11, 11)));
+		add(getHelpLabel(), new Constraints(new Leading(8, 384, 10, 10), new Leading(296, 23, 10, 10)));
+		add(getButtonPanel(), new Constraints(new Leading(88, 188, 10, 10), new Leading(53, 237, 11, 11)));
+		add(getOpenFileButton(), new Constraints(new Leading(424, 74, 10, 10), new Leading(205, 11, 11)));
+		add(getSaveFileButton(), new Constraints(new Leading(424, 74, 10, 10), new Leading(232, 10, 10)));
+		add(getJLabel14(), new Constraints(new Leading(424, 10, 10), new Leading(63, 11, 11)));
+		add(getSize64(), new Constraints(new Leading(420, 6, 6), new Leading(76, 7, 7)));
+		add(getSize128(), new Constraints(new Leading(420, 6, 6), new Leading(95, 7, 7)));
+		add(getSize256(), new Constraints(new Leading(420, 6, 6), new Leading(115, 7, 7)));
+		add(getJLabel3(), new Constraints(new Leading(418, 108, 10, 10), new Leading(140, 11, 11)));
 		initButtonGroup1();
 		initButtonGroup2();
-		setSize(402, 292);
+		setSize(536, 325);
+	}
+	private JButton getCancelButton() {
+		if (cancelButton == null) {
+			cancelButton = new JButton();
+			cancelButton.setText("Cancel");
+			cancelButton.addMouseListener(new MouseAdapter() {
+	
+				public void mouseClicked(MouseEvent event) {
+					cancelButtonMouseMouseClicked(event);
+				}
+			});
+		}
+		return cancelButton;
+	}
+	private JList getPageComponentList() {
+		if (pageComponentList == null) {
+			pageComponentList = new JList();
+			DefaultListModel listModel = new DefaultListModel();
+			listModel.addElement("item0");
+			listModel.addElement("item1");
+			listModel.addElement("item2");
+			listModel.addElement("item3");
+			pageComponentList.setModel(listModel);
+			pageComponentList.addListSelectionListener(new ListSelectionListener() {
+	
+				public void valueChanged(ListSelectionEvent event) {
+					pageComponentListListSelectionValueChanged(event);
+				}
+			});
+			pageComponentList.addMouseListener(new MouseAdapter() {
+	
+				public void mouseClicked(MouseEvent event) {
+					pageComponentListMouseMouseClicked(event);
+				}
+			});
+		}
+		return pageComponentList;
+	}
+	private JScrollPane getJScrollPane1() {
+		if (jScrollPane1 == null) {
+			jScrollPane1 = new JScrollPane();
+			jScrollPane1.setBorder(new LineBorder(Color.black, 1, false));
+			jScrollPane1.setViewportView(getPageComponentList());
+		}
+		return jScrollPane1;
+	}
+
+	private JList getPagesList() {
+		if (pagesList == null) {
+			pagesList = new JList();
+			pagesList.setFont(new Font("Tahoma", Font.PLAIN, 9));
+			DefaultListModel listModel = new DefaultListModel();
+			listModel.addElement("1");
+			listModel.addElement("2");
+			listModel.addElement("3");
+			listModel.addElement("4");
+			listModel.addElement("5");
+			listModel.addElement("6");
+			listModel.addElement("7");
+			listModel.addElement("8");
+			listModel.addElement("9");
+			listModel.addElement("10");
+			listModel.addElement("11");
+			listModel.addElement("12");
+			listModel.addElement("13");
+			listModel.addElement("14");
+			listModel.addElement("15");
+			listModel.addElement("16");
+			pagesList.setModel(listModel);
+			pagesList.addListSelectionListener(new ListSelectionListener() {
+	
+				public void valueChanged(ListSelectionEvent event) {
+					pagesListListSelectionValueChanged(event);
+				}
+			});
+		}
+		return pagesList;
+	}
+
+	private JScrollPane getJScrollPane0() {
+		if (jScrollPane0 == null) {
+			jScrollPane0 = new JScrollPane();
+			jScrollPane0.setBorder(new LineBorder(Color.black, 1, false));
+			jScrollPane0.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+			jScrollPane0.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			jScrollPane0.setFont(new Font("Tahoma", Font.PLAIN, 9));
+			jScrollPane0.setViewportView(getPagesList());
+		}
+		return jScrollPane0;
 	}
 
 	private JComboBox getStepsComboBox() {
@@ -190,7 +297,6 @@ public class MainFrame extends JFrame {
 		buttonGroup2.add(getSize128());
 		buttonGroup2.add(getSize256());
 	}
-
 	private JLabel getJLabel14() {
 		if (jLabel14 == null) {
 			jLabel14 = new JLabel();
@@ -212,7 +318,6 @@ public class MainFrame extends JFrame {
 		}
 		return size256;
 	}
-
 	private JRadioButton getSize128() {
 		if (size128 == null) {
 			size128 = new JRadioButton();
@@ -226,7 +331,6 @@ public class MainFrame extends JFrame {
 		}
 		return size128;
 	}
-
 	private JRadioButton getSize64() {
 		if (size64 == null) {
 			size64 = new JRadioButton();
@@ -241,7 +345,6 @@ public class MainFrame extends JFrame {
 		}
 		return size64;
 	}
-
 	private JLabel getJLabel13() {
 		if (jLabel13 == null) {
 			jLabel13 = new JLabel();
@@ -358,21 +461,6 @@ public class MainFrame extends JFrame {
 		return jLabel7;
 	}
 
-	private JTextField getJTextField0() {
-		if (jTextField0 == null) {
-			jTextField0 = new JTextField();
-		}
-		return jTextField0;
-	}
-
-	private JLabel getJLabel6() {
-		if (jLabel6 == null) {
-			jLabel6 = new JLabel();
-			jLabel6.setText("CC");
-		}
-		return jLabel6;
-	}
-
 	private JButton getAddButtonButton() {
 		if (addButtonButton == null) {
 			addButtonButton = new JButton();
@@ -402,7 +490,6 @@ public class MainFrame extends JFrame {
 		}
 		return noteRadioButton;
 	}
-
 	private JButton getAddMatrixButton() {
 		if (addMatrixButton == null) {
 			addMatrixButton = new JButton();
@@ -432,7 +519,6 @@ public class MainFrame extends JFrame {
 		buttonGroup1.add(getPushRadioButton());
 		buttonGroup1.add(getToggleRadioButton());
 	}
-
 	private JTextField getChannelTextField() {
 		if (channelTextField == null) {
 			channelTextField = new JTextField();
@@ -492,7 +578,6 @@ public class MainFrame extends JFrame {
 		}
 		return toggleRadioButton;
 	}
-
 	private JRadioButton getPushRadioButton() {
 		if (pushRadioButton == null) {
 			pushRadioButton = new JRadioButton();
@@ -506,16 +591,14 @@ public class MainFrame extends JFrame {
 		}
 		return pushRadioButton;
 	}
-
 	private JLabel getJLabel3() {
 		if (jLabel3 == null) {
 			jLabel3 = new JLabel();
 			jLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
-			jLabel3.setText("jip.monocontrol by Jip");
+			jLabel3.setText("Monocontrol, JIP edit");
 		}
 		return jLabel3;
 	}
-
 	private JButton getAddLooperButton() {
 		if (addLooperButton == null) {
 			addLooperButton = new JButton();
@@ -602,8 +685,9 @@ public class MainFrame extends JFrame {
 	private JPanel getButtonPanel() {
 		if (jPanel0 == null) {
 			jPanel0 = new JPanel();
-			jPanel0.setBorder(BorderFactory.createTitledBorder(null, "Parameters for new objects", TitledBorder.LEADING, TitledBorder.DEFAULT_POSITION, new Font(
+			jPanel0.setBorder(BorderFactory.createTitledBorder(null, "Parameters for objects", TitledBorder.LEADING, TitledBorder.DEFAULT_POSITION, new Font(
 					"Tahoma", Font.PLAIN, 11), Color.black));
+			jPanel0.setEnabled(false);
 			jPanel0.setLayout(new GroupLayout());
 			jPanel0.add(getNoteRadioButton(), new Constraints(new Leading(4, 10, 10), new Leading(12, 10, 10)));
 			jPanel0.add(getPushRadioButton(), new Constraints(new Leading(55, 6, 6), new Leading(12, 10, 10)));
@@ -621,10 +705,10 @@ public class MainFrame extends JFrame {
 			jPanel0.add(getStepsComboBox(), new Constraints(new Leading(128, 43, 10, 10), new Leading(158, 11, 11)));
 			jPanel0.add(getJLabel13(), new Constraints(new Leading(87, 10, 10), new Leading(141, 11, 11)));
 			jPanel0.add(getResolutionComboBox(), new Constraints(new Leading(44, 10, 10), new Leading(136, 11, 11)));
+			jPanel0.add(getCancelButton(), new Constraints(new Leading(104, 10, 10), new Leading(186, 11, 11)));
 		}
 		return jPanel0;
 	}
-
 	private JComboBox getJComboBox0(){
 	if(jComboBox0==null){
 	jComboBox0 = new JComboBox();
@@ -792,7 +876,7 @@ public class MainFrame extends JFrame {
 	}
 	
 
-	private void setStatusLabel(String string) {
+	public void setStatusLabel(String string) {
 		helpLabel.setText(string);		
 	}
 
@@ -854,7 +938,7 @@ public class MainFrame extends JFrame {
 				object.setAttribute("sizex", String.valueOf(co.getSizeX()));
 				object.setAttribute("posy", String.valueOf(co.getPosY()));
 				object.setAttribute("posx", String.valueOf(co.getPosX()));
-				object.setAttribute("cc", String.valueOf(co.getCCValue()));
+				object.setAttribute("cc", String.valueOf(co.getCC()));
 				object = co.toJDOMXMLElement(object);
 
 				view.addContent(object);
@@ -872,6 +956,7 @@ public class MainFrame extends JFrame {
 	}
 
 	private void jButton5MouseMouseClicked(MouseEvent event) {
+		enableControls();
 		setStatusLabel("Add Fader: Hold a button, then press a button above the button you hold");
 		vm.setMode(2, "fader");
 	}
@@ -880,26 +965,31 @@ public class MainFrame extends JFrame {
 		noteRadioButton.setSelected(false);
 		pushRadioButton.setSelected(false);
 		toggleRadioButton.setSelected(false);
+		enableControls();
 		setStatusLabel("Please select a button type");
 
 	}
 
 	private void addXFaderButtonMouseMouseClicked(MouseEvent event) {
+		enableControls();
 		setStatusLabel("Add Crossfader: Hold a button, the aress a button on the right of the one you hold");
 		vm.setMode(2, "crossfader");
 	}
 
 	private void addXYButtonMouseMouseClicked(MouseEvent event) {
+		enableControls();
 		setStatusLabel("Add XYFader: Hold a button, then press a button up and rigth from the one you hold");
 		vm.setMode(5);
 	}
 
 	private void addTracksButtonMouseMouseClicked(MouseEvent event) {
+		enableControls();
 		setStatusLabel("Add Ableton Tracks: Hold a button, then press a button up and rigth from the one you hold");
 		vm.setMode(7);
 	}
 
 	private void addLooperButtonMouseMouseClicked(MouseEvent event) {
+		enableControls();
 		setStatusLabel("Add Looper: Hold a button, then press a button up and rigth from the one you hold");
 		vm.setMode(6);
 	}
@@ -933,6 +1023,7 @@ public class MainFrame extends JFrame {
 
 	private void addMatrixButtonMouseMouseClicked(MouseEvent event) {
 		setStatusLabel("Add ButtonMatrix: Hold a button, then press a button up and rigth from the one you hold");
+		enableControls();
 		vm.setMode(4);
 	}
 
@@ -962,8 +1053,9 @@ public class MainFrame extends JFrame {
 		if (ccval < 0 || ccval > 127)
 			setStatusLabel("Invalid CC Number!");
 		else {
-			if (vm.selected != null && vm.getMode() == -1)
-				vm.selected.setCCValue(ccval);
+			if (vm.selected != null && vm.getMode() == -1){
+				vm.selected.setCC(ccval);
+			}
 			else {
 				vm.nextObjectsCC = ccval;
 				setStatusLabel("Next object created will have CC: "
@@ -978,8 +1070,9 @@ public class MainFrame extends JFrame {
 		if (cval < 0 || cval > 15)
 			setStatusLabel("Invalid Channel Number!");
 		else {
-			if (vm.selected != null && vm.getMode() == -1)
+			if (vm.selected != null && vm.getMode() == -1){
 				vm.selected.setChannel(cval);
+			}
 			else {
 				vm.nextObjectsChannel = cval;
 				setStatusLabel("Next object created will have CC: "
@@ -991,13 +1084,13 @@ public class MainFrame extends JFrame {
 
 	private void oscOutTextFieldActionActionPerformed(ActionEvent event) {
 		MonoControl.OSCOutPort = Integer.parseInt(oscOutTextField.getText());
-		vm.m = new Monome(vm);
+		vm.monome = new Monome(vm);
 		setStatusLabel("OSC Out port changed to: " + MonoControl.OSCOutPort);
 	}
 
 	private void oscInTextFieldActionActionPerformed(ActionEvent event) {
 		MonoControl.OSCInPort = Integer.parseInt(oscInTextField.getText());
-		vm.m = new Monome(vm);
+		vm.monome = new Monome(vm);
 		setStatusLabel("OSC In port changed to: " + MonoControl.OSCInPort);
 
 	}
@@ -1030,6 +1123,64 @@ public class MainFrame extends JFrame {
 		MonoControl.PATTERNSTEPS = Integer.parseInt((String)((JComboBox) event.getSource()).getSelectedItem());
 	}
 
+	private void pageComponentListListSelectionValueChanged(ListSelectionEvent event) {
+		
+		if (vm.selected != null)
+			vm.selected.setBlink(false);
+		
+		ControlObject obj = (ControlObject) pageComponentList.getSelectedValue();	
+		if (obj!=null){
+			vm.selected = obj;
+			vm.blink(vm.selected);
+			ccTextField.setText(String.valueOf(vm.selected.getCC()));
+			channelTextField.setText(String.valueOf(vm.selected.getChannel() + 1));
+			setStatusLabel("Edit mode. Editing " + obj.toString() + " object");
+			vm.setMode(-1); //edit mode
+		}
+		else{
+			vm.selected = null;
+			vm.returnToPlayMode();
+			ccTextField.setText(String.valueOf(vm.nextObjectsCC));
+			channelTextField.setText(String.valueOf(vm.nextObjectsChannel + 1));
+			setStatusLabel("Play mode");
+		}
+	}
+
+	private void pagesListListSelectionValueChanged(ListSelectionEvent event) {
+		int index = pagesList.getSelectedIndex();
+		View v = vm.views[index];
+		DefaultListModel m = (DefaultListModel) pageComponentList.getModel();
+		m.clear();
+		for (ControlObject obj: v.objects){
+			m.addElement(obj);
+		}
+	}
+
+	public void setControl(MonoControl mc) {
+		this.mc = mc;
+		
+	}
+	private void pageComponentListMouseMouseClicked(MouseEvent event) {
+		pageComponentListListSelectionValueChanged(null);
+	}
 	
+	public void enableControls(){enableControls(true);}
+	public void disableControls(){enableControls(false);}
+	private void enableControls(boolean enabled){
+		noteRadioButton.setEnabled(enabled);
+		pushRadioButton.setEnabled(enabled);
+		toggleRadioButton.setEnabled(enabled);
+		ccTextField.setEnabled(enabled);
+		channelTextField.setEnabled(enabled);
+		gateLoopChockesCheckBox.setEnabled(enabled);
+		resolutionComboBox.setEnabled(enabled);
+		stepsComboBox.setEnabled(enabled);
+		cancelButton.setEnabled(enabled);
+		
+	}
+	private void cancelButtonMouseMouseClicked(MouseEvent event) {
+		vm.returnToPlayMode();
+		disableControls();
+	}
 
 }
